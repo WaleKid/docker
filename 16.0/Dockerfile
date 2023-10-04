@@ -36,6 +36,7 @@ RUN apt-get update && \
     && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.buster_amd64.deb \
     && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
+    && apt-get install -y nano git \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
 # install latest postgresql-client
@@ -53,7 +54,8 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /et
     && rm -rf /var/lib/apt/lists/*
 
 # Install rtlcss (on Debian buster)
-RUN npm install -g rtlcss
+RUN npm install -g rtlcss \
+    && pip install pulsar-client asyncio avro avro-schema pdfminer phonenumbers
 
 # Install Odoo
 ENV ODOO_VERSION 16.0
@@ -71,9 +73,12 @@ COPY ./odoo.conf /etc/odoo/
 
 # Set permissions and Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
 RUN chown odoo /etc/odoo/odoo.conf \
-    && mkdir -p /mnt/extra-addons \
-    && chown -R odoo /mnt/extra-addons
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
+    && git clone https://github.com/WaleKid/addissystems.git \
+    && cp -r addissystems/extra-modules /etc/odoo/ \
+    && chown -R odoo /etc/odoo/extra-modules/download_modules \
+    && chown -R odoo /etc/odoo/extra-modules/custom_modules \
+    && rm -r addissystems
+VOLUME ["/var/lib/odoo", "/etc/odoo/extra-modules/download_modules", "/etc/odoo/extra-modules/custom_modules"]
 
 # Expose Odoo services
 EXPOSE 8069 8071 8072
