@@ -1,5 +1,5 @@
 FROM debian:bullseye-slim
-MAINTAINER Odoo S.A. <info@odoo.com>
+LABEL org.opencontainers.image.authors="brookwelela93@gmail.com"
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -8,6 +8,7 @@ ENV LANG C.UTF-8
 
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 RUN apt-get update && \
+    apt-get install apt-utile &&\
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
